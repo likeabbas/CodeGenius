@@ -1,6 +1,6 @@
 .container.new-discussion-timeline.experiment-repo-nav {
     margin-left: 4px !important;
-    margin-right: 0px !important;
+    margin-right: 394px !important;
     display: inline-block;
     width: 100%;
 }
@@ -38,7 +38,9 @@
     border-left: 1px solid #d1d5da;
     border-bottom: 1px solid #d1d5da;
     border-right: 1px solid #d1d5da;
-
+}
+.codeCommentContent {
+    border-top: 1px solid #d1d5da;
 }
 .flybyCommentHeader {
     border-top-left-radius: 3px;
@@ -82,9 +84,21 @@
     font-weight: 600;
 }
 #anchor {
-    width: 100%;
-    min-width: 300px;
-    max-width: 600px;
+    width: 380px;
+    position: fixed;
+    top: 178px;
+    right: 8px;
     display: inline-block;
-    padding: 0 6px;
+
+}
+
+/* For when the screen is too small to display the sidebar */
+@media (max-width: 1290px) {
+    #anchor {
+        display: none;
+    }
+    .container.new-discussion-timeline.experiment-repo-nav {
+        margin-left: 8px !important;
+        margin-right: 8px !important;
+    }
 }
