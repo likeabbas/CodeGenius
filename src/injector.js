@@ -23,8 +23,6 @@ function init() {
       printCommentsOnClick(codeLinesToComments);
       const anchor = configureContainer();
       injectBranding(anchor);
-      const comments = api.getComments(window.location.toString());
-      comments.forEach(c => injectComment(anchor, c.username, c.content, c.picUrl));
     });
 }
 
@@ -78,22 +76,26 @@ export function injectWriteBox(anchor, picUrl) {
   pic.src = picUrl;
   utility.addClasses(pic, ['flybyCommentPic']);
   const writeContentDiv = utility.div();
+  console.log('writeContentDiv', writeContentDiv);
   utility.addClasses(
     writeContentDiv,
-    [
-      'write-content',
-      'js-write-bucket' ,
-      'js-uploadable-container',
-      'js-upload-markdown-image',
-      'is-default upload-enabled'
-    ]
+    [ 'flybyWriteBoxContainer' ]
   );
   const writeBody = utility.create('textarea');
-  utility.addClasses(writeBody, ['previewable-comment-form']);
-  utility.appendChildren(writeContentDiv, [writeBody]);
+  writeBody.setAttribute('placeholder', 'Leave a comment');
+  writeBody.setAttribute('id', 'flybyWriteBoxContent');
+  const commentBtn = utility.create('button');
+  commentBtn.innerHTML = 'Comment';
+  commentBtn.setAttribute('id', 'flybyWriteBoxCommentButton');
+  utility.addClasses(commentBtn, ['btn-primary', 'btn']);
+  const buttonContainer = utility.div();
+  utility.addClasses(buttonContainer, ['flybyWriteBoxButtonContainer']);
+  utility.appendChildren(buttonContainer, [commentBtn]);
+  utility.appendChildren(writeContentDiv, [writeBody, buttonContainer]);
   utility.appendChildren(writeBoxWrapper, [pic, container]);
   utility.appendChildren(container, [writeContentDiv]);
   utility.appendChildren(anchor, [container]);
+  console.log('inject writebox');
 }
 
 export function injectCodeComment(anchor, content) {

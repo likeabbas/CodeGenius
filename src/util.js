@@ -14,7 +14,7 @@ function injectStyle(element, style) {
 }
 
 function addClasses(element, classes) {
-  classes.forEach((c) => { element.classList.add(c) });
+  classes.forEach((c) => { console.log('class: ' + c); element.classList.add(c) });
   return this;
 }
 

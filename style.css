@@ -1,12 +1,22 @@
 .container.new-discussion-timeline.experiment-repo-nav {
     margin-left: 4px !important;
-    margin-right: 394px !important;
     display: inline-block;
     width: 100%;
+}
+div[role=main] {
+    margin-right: 312px;
+}
+nav.reponav.js-repo-nav.js-sidenav-container-pjax.zh-attached {
+    overflow-x: auto;
+}
+.container {
+    width: auto !important;
 }
 .flybyWrapper {
     display: flex;
     flex-flow: row;
+    margin-right: 6px;
+    margin-left: 6px;
 }
 .flybyHeader {
     border: 1px solid #bedfff;
@@ -27,6 +37,7 @@
 
 .flybyComment {
     width: 100%;
+    margin-bottom: 12px;
 }
 .flybyCommentPic {
     border-radius: 3px !important;
@@ -84,16 +95,44 @@
     font-weight: 600;
 }
 #anchor {
-    width: 380px;
+    width: 300px;
     position: fixed;
-    top: 178px;
+    top: 62px;
     right: 8px;
     display: inline-block;
 
 }
 
+.flybyWriteBoxContainer {
+    padding: 8px 8px 0 8px;
+    background-color: #fff;
+    border: 1px solid #d1d5da;
+    border-radius: 3px;
+}
+#flybyWriteBoxContent {
+    display: block;
+    width: 100%;
+    min-height: 100px;
+    max-height: 500px;
+    padding: 8px;
+    resize: vertical;
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    border: 1px solid #d1d5da;
+    border-radius: 3px;
+    outline: none;
+    box-shadow: inset 0 1px 2px rgba(27,31,35,0.075);
+}
+.flybyWriteBoxButtonContainer {
+    display: flex;
+    flex-flow: row-reverse;
+    align-items: center;
+    padding-top: 8px;
+    padding-bottom: 10px;
+}
+
 /* For when the screen is too small to display the sidebar */
-@media (max-width: 1290px) {
+@media (max-width: 1000px) {
     #anchor {
         display: none;
     }

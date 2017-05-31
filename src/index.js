@@ -1,4 +1,5 @@
 import injector from './injector'
+import * as api from './fakeapi';
 
 
 const COMMENT_CLASS_SELECTOR = 'pl-c';
@@ -8,6 +9,8 @@ const HIDE_COMMENT = 'hideComment'
 const TD    = 'td'
 const TR    = 'tr'
 const TBODY = 'tbody'
+
+const DEFAULT_PIC = 'https://avatars1.githubusercontent.com/u/8461581?v=3&s=88'
 
 var hideCommentEl = document.createElement('style')
 hideCommentEl.type = 'text/css'
@@ -224,7 +227,21 @@ document.addEventListener("DOMContentLoaded", function () {
         .replace(/(\/{2})/, '');
       injector.removeAllButBranding(anchor);
       injector.injectCodeComment(anchor, comment);
+      const comments = api.getComments(window.location.toString());
+      comments.forEach(c => injector.injectComment(anchor, c.username, c.content, c.picUrl));
     }
   })
+  console.log('hihihi')
+  injector.injectWriteBox(anchor, DEFAULT_PIC);
+
+  const commentButton = document.querySelector('#flybyWriteBoxCommentButton');
+  const writeBoxContent = document.querySelector('#flybyWriteBoxContent');
+  commentButton.onclick = () => {
+    const content = writeBoxContent.value;
+    if (content.trim() === '') return;
+
+  }
+
+
   // addCommentBack(comments[6])
 })
