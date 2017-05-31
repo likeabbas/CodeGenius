@@ -140,14 +140,14 @@ function getComments(tbody) {
 
 function removeComment(comment) {
   
-  for (let i = 1; i < comment.trs.length; i++) {
+  for (let i = 0; i < comment.trs.length; i++) {
 
     let tr = comment.trs[i]
     tr.className += HIDE_COMMENT
     
   }
 
-  comment.trs[0].children[1].children[0].textContent = ""
+  //comment.trs[0].children[1].children[0].textContent = ""
 }
 
 function removeComments (comments, commentIndexes) {
