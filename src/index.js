@@ -46,10 +46,6 @@ let state = {}
 
 function IsComment(td) {
 
-  if (!td.hasChildNodes()) {
-    return false 
-  }
-
   let span = td.children[0]
 
   if (span === undefined) {
@@ -58,6 +54,14 @@ function IsComment(td) {
 
   let t = span.classList.contains(COMMENT_CLASS_SELECTOR)
   return t
+}
+
+// checking if the line is blank
+function IsBlank(td) {
+
+  if (!td.hasChildNodes()) {
+    return true
+  }
 }
 
 // Returns array of [obj comment, int lastLine]
@@ -79,7 +83,7 @@ function createComment (listOfTrs, index) {
     const  tdLineNumber = tds[0]
     const  tdComment    = tds[1]
 
-    if (!IsComment(tdComment)) {
+    if (!IsBlank(tdComment) && !IsComment(tdComment)) {
       break
     }
 
@@ -191,7 +195,6 @@ function getLinesWithCode() {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-  console.log("here")
   const tbody = document.getElementsByTagName('tbody')[0]
   document.getElementsByTagName('head')[0].appendChild(hideCommentEl);
 
@@ -243,7 +246,7 @@ document.addEventListener("DOMContentLoaded", function () {
       comments.forEach(c => injector.injectComment(anchor, c.username, c.content, c.picUrl));
     }
   })
-  console.log('hihihi')
+  
   injector.injectWriteBox(anchor, DEFAULT_PIC);
 
   const commentButton = document.querySelector('#flybyWriteBoxCommentButton');
