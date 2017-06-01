@@ -92,57 +92,79 @@ function getFileNameFromUrl(url) {
 export function addCodeComment(content, sourceCodeUrl, lineNumber) {
   const owner = getOwnerFromUrl(sourceCodeUrl);
   const name = getNameFromUrl(sourceCodeUrl);
+
   let repo = db.repositories
     .filter(r => r.owner.toLowerCase() === owner.toLowerCase())[0];
+
   if (!repo) {
-    repo = { owner, name };
+    let files = []
+    repo = { owner, name, files};
     db.repositories.push(repo)
   }
+
   const fileName = getFileNameFromUrl(sourceCodeUrl);
+
   let file = repo.files
     .filter(f => f.name.toLowerCase() === fileName.toLowerCase())[0];
+
   if (!file) {
     file = { name: fileName, lines: [] };
     repo.files.push(file);
   }
+
   let line = file.lines.filter(l => l.number === lineNumber)[0];
+
   if (!line) {
     line = { number: lineNumber, comments: [], content: '' };
   }
+
   line = { ...line, type: 'CODE', content };
   file.lines = [...file.lines.filter(l => l.number !== lineNumber), line];
   file.lines.sort((a, b) => a.number - b.number);
 }
 
 export function addComment(content, username, picUrl, sourceCodeUrl, lineNumber) {
+
   const owner = getOwnerFromUrl(sourceCodeUrl);
   const name = getNameFromUrl(sourceCodeUrl);
+
   let repo = db.repositories
     .filter(r => r.owner.toLowerCase() === owner.toLowerCase())[0];
+
+  // Create repo if it doesn't exists
   if (!repo) {
-    repo = { owner, name };
+    let files = []
+    repo = { owner, name, files };
     db.repositories.push(repo)
   }
+
   const fileName = getFileNameFromUrl(sourceCodeUrl);
+
   let file = repo.files
     .filter(f => f.name.toLowerCase() === fileName.toLowerCase())[0];
+
   if (!file) {
     file = { name: fileName, lines: [] };
     repo.files.push(file);
   }
+
   let line = file.lines.filter(l => l.number === lineNumber)[0];
+
   if (!line) {
     line = { number: lineNumber, comments: [], content: '' };
   }
+
   if (line.content === '') {
     line.type = 'COMMENT';
   }
+
   const comment = {
     date: getDateTime(),
     username,
     content,
     picUrl,
   };
+
   line.comments.push(comment);
   file.lines = [...file.lines.filter(l => l.number !== lineNumber), line];
   file.lines.sort((a, b) => a.number - b.number);

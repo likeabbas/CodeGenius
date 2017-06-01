@@ -65,7 +65,7 @@ function createComment (listOfTrs, index) {
 
   let trs            = []
   let lineNumbers    = []
-  let commentString = []
+  let commentString  = []
 
   let leadTrOriginalString 
   let i
@@ -190,6 +190,8 @@ function getLinesWithCode() {
 
 
 document.addEventListener("DOMContentLoaded", function () {
+
+  console.log("here")
   const tbody = document.getElementsByTagName('tbody')[0]
   document.getElementsByTagName('head')[0].appendChild(hideCommentEl);
 
@@ -197,12 +199,22 @@ document.addEventListener("DOMContentLoaded", function () {
   let comments = arr[0]
   let commentIndexes  = arr[1]
 
+  for (let i = 0; i < commentIndexes.length; i++) {
+    let linenumber = commentIndexes[i]
+    let comment = comments[linenumber].totalComment
+    console.log(comment)
+    api.addCodeComment(comment, window.location.href, linenumber)
+
+  }
 
   removeComments(comments, commentIndexes, tbody)
+
   const commentLines = Object.keys(comments)
     .map(key => comments[key])
     .reduce((a, c) => [...a, ...c.lineNumbers ], [])
     .map(n => +n)
+
+
   const codeLinesToComments = injector.matchCodeLinesToComments(commentLines, getLinesWithCode())
   const codeLines = Object.keys(codeLinesToComments).map(i => +i);
   let codeLineNodes = []
