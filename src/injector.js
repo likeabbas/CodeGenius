@@ -133,20 +133,15 @@ export function injectComment(anchor, username, content, picUrl) {
 export function injectBranding(anchor) {
   const headerDiv = document.createElement('div');
   headerDiv.classList.add('flybyHeader');
-  const bar = document.createElement('div');
-  bar.classList.add('flybyHeaderBar');
-  const poweredBy = document.createElement('h3');
-  poweredBy.innerHTML = 'Powered by';
-  poweredBy.style.display = 'inline-block';
-  poweredBy.style.fontSize = '14px';
-  bar.appendChild(poweredBy)
   const flyby = document.createElement('h1');
   flyby.innerHTML = 'FlyBy';
   flyby.style.display = 'inline-block';
+  const bar = document.createElement('div');
+  bar.classList.add('flybyHeaderBar');
+  bar.appendChild(flyby);
   const tagline = document.createElement('p');
   tagline.innerHTML = 'Agile code review';
   headerDiv.appendChild(bar);
-  headerDiv.appendChild(flyby);
   headerDiv.appendChild(tagline);
   anchor.append(headerDiv);
 }
