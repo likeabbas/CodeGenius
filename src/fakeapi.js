@@ -8,7 +8,7 @@ const loremIpsumLong = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,
 
 const picUrl = 'https://avatars1.githubusercontent.com/u/8461581?v=3&s=88';
 
-function getDateTime() { return new Date().getTime() / 1000 }
+function getTimestamp() { return new Date().getTime() / 1000 }
 
 
 const comments = [
@@ -41,7 +41,7 @@ const db = {
       owner: 'Facebook',
       files: [
         {
-          name: 'dangerfile.js',
+          name: 'fakeFile.js',
           lines: [
             {
               number: 19,
@@ -52,7 +52,7 @@ const db = {
                   username: 'AnthonyAltieri',
                   content: loremIpsumMedium,
                   picUrl: picUrl,
-                  date: getDateTime(),
+                  date: getTimestamp(),
                 }
               ]
             }
@@ -63,11 +63,65 @@ const db = {
   ]
 }
 
+function getRepo(sourceCodeUrl) {
+  const owner = getOwnerFromUrl(sourceCodeUrl);
+  return db.repositories.filter(r => r.owner.toLowerCase() === owner.toLowerCase())[0];
+}
+function getFile(repo, sourceCodeUrl) {
+  const fileName = getFileNameFromUrl(sourceCodeUrl);
+  return repo.files.filter(f => f.name.toLowerCase() === fileName.toLowerCase())[0];
+}
+
+export function getLine(sourceCodeUrl, lineNumber) {
+  const foundRepo = getRepo(sourceCodeUrl);
+  if (!foundRepo) return null;
+
+  const foundFile = getFile(foundRepo, sourceCodeUrl);
+  if (!foundFile) return null;
+
+  return foundFile.lines.filter(l => l.number === lineNumber)[0];
+}
+
+export function getComments(sourceCodeUrl, lineNumber) {
+  console.log('getComments()');
+  const line = getLine(sourceCodeUrl, lineNumber);
+  console.log('line', line);
+  console.log('line.comments');
+  if (!line) return null;
+  return line.comments;
+}
+
 export function getDb() {
   return db;
 }
 
-export function postComment(content, sorceCodeUrl, lineNumber) {
+export function getUserById(userId) {
+  return {
+    username: 'AnthonyAltieri',
+    picUrl,
+  }
+}
+class Comment {
+  constructor(content, userId, username, timestamp) {
+    this.content = content;
+    this.userId = userId;
+    this.username = username;
+    this.timestamp = timestamp;
+  }
+}
+
+
+export function postComment(content, userId, sourceCodeUrl, lineNumber) {
+  const timestamp = getTimestamp();
+  const line = getLine(sourceCodeUrl, lineNumber);
+  if (!line) {
+    console.error(`Couldn't find line ${lineNumber} to put a comment`);
+    return false;
+  }
+  const user = getUserById(userId);
+  const comment = new Comment(content, userId, user.username, timestamp);
+  line.comments = [...line.comments, comment];
+  return true;
 }
 
 function getUrlSlashSplit(url) {
@@ -163,7 +217,7 @@ export function addComment(content, username, picUrl, sourceCodeUrl, lineNumber)
   }
 
   const comment = {
-    date: getDateTime(),
+    date: getTimestamp(),
     username,
     content,
     picUrl,
@@ -172,11 +226,6 @@ export function addComment(content, username, picUrl, sourceCodeUrl, lineNumber)
   line.comments.push(comment);
   file.lines = [...file.lines.filter(l => l.number !== lineNumber), line];
   file.lines.sort((a, b) => a.number - b.number);
-}
-
-
-export function getComments(sourceCodeUrl) {
-  return comments;
 }
 
 export default {

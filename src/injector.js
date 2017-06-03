@@ -15,7 +15,6 @@ const TOP_NODE_ID = 'js-repo-pjax-container';
 
 
 function init() {
-  console.log('init()');
   Promise.all([deleteElements(), getLinesWithCode()])
     .then(([commentLines, codeLines]) => {
       const codeLinesToComments = matchCodeLinesToComments(commentLines, codeLines);
@@ -76,7 +75,6 @@ export function injectWriteBox(anchor, picUrl) {
   pic.src = picUrl;
   utility.addClasses(pic, ['flybyCommentPic']);
   const writeContentDiv = utility.div();
-  console.log('writeContentDiv', writeContentDiv);
   utility.addClasses(
     writeContentDiv,
     [ 'flybyWriteBoxContainer' ]
@@ -95,7 +93,6 @@ export function injectWriteBox(anchor, picUrl) {
   utility.appendChildren(writeBoxWrapper, [pic, container]);
   utility.appendChildren(container, [writeContentDiv]);
   utility.appendChildren(anchor, [container]);
-  console.log('inject writebox');
 }
 
 export function injectCodeComment(anchor, content) {
@@ -109,7 +106,8 @@ export function injectCodeComment(anchor, content) {
 }
 
 
-export function injectComment(anchor, username, content, picUrl) {
+export function injectComment(username, content, picUrl) {
+  const anchor = document.getElementById('flybyComments');
   const container = utility.create('div');
   utility.addClasses(container, ['flybyComment']);
   const heading = utility.create('div');
@@ -144,6 +142,9 @@ export function injectBranding(anchor) {
   headerDiv.appendChild(bar);
   headerDiv.appendChild(tagline);
   anchor.append(headerDiv);
+  const commentsDiv = utility.div();
+  commentsDiv.setAttribute('id', 'flybyComments');
+  anchor.appendChild(commentsDiv);
 }
 
 function configureContainer() {
@@ -169,20 +170,23 @@ function printCommentsOnClick(codeLinesToComments) {
     })
 }
 
-export function injectLineHighlights(lineNumbers, lineNodes) {
-  const styleLines = (
-    `.flybyHighlight{ 
-          background-color: ${GREY_COLOR};
-          cursor: pointer;
-     }
-     .flybyHighlight:hover {
-          background-color: ${YELLOW_COLOR};
-     }
-    `
-  );
-  lineNodes.forEach(n => { n.classList.add('flybyHighlight') });
-  document.querySelector('head').innerHTML += '<style>' +
-    styleLines + '</style>';
+export const CLASS_FLYBY_HIGHLIGHT = 'flybyHighlight';
+
+export function injectLineHighlights() {
+  document.querySelector('head').innerHTML += `
+    <style>
+      .flybyHighlight{
+        background-color: ${GREY_COLOR};
+        cursor: pointer;
+      }
+      .flybyHighlight:hover {
+        background-color: ${YELLOW_COLOR};
+      }
+      .flybySelected {
+        background-color: ${YELLOW_COLOR};
+      }
+    </style>
+  `
 }
 
 function stringToNumber(string) {
@@ -278,9 +282,9 @@ function removeChildren(node) {
   }
 }
 
-function removeAllButBranding(anchor) {
-  while (anchor.children.length > 1) {
-    anchor.removeChild(anchor.children[1]);
+function clearNonEssential(anchor) {
+  while (anchor.children.length > 2) {
+    anchor.removeChild(anchor.children[2]);
   }
 }
 
@@ -293,7 +297,8 @@ export default {
   injectLineHighlights,
   injectCodeComment,
   removeChildren,
-  removeAllButBranding
+  clearNonEssential,
+  CLASS_FLYBY_HIGHLIGHT,
 }
 
 

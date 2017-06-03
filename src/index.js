@@ -1,6 +1,8 @@
 import injector from './injector'
+import R from 'ramda';
 import * as api from './fakeapi';
-
+import * as CodeCommentService from './services/CodeComment';
+import * as CodeService from './services/Code';
 
 const COMMENT_CLASS_SELECTOR = 'pl-c';
 const CODE_LINE_CLASS     = 'data-line-number';
@@ -9,8 +11,10 @@ const HIDE_COMMENT = 'hideComment'
 const TD    = 'td'
 const TR    = 'tr'
 const TBODY = 'tbody'
+const USER_ID = 123;
 
-const DEFAULT_PIC = 'https://avatars1.githubusercontent.com/u/8461581?v=3&s=88'
+
+const DEFAULT_PIC = 'https://avatars3.githubusercontent.com/u/8461581?v=3&s=40';
 
 var hideCommentEl = document.createElement('style')
 hideCommentEl.type = 'text/css'
@@ -113,7 +117,6 @@ function createComment (listOfTrs, index) {
 
 
 function getComments(tbody) {
-
   let comments = {}
   const trs = tbody.getElementsByTagName(TR)
 
@@ -191,74 +194,120 @@ function getLinesWithCode() {
   return lineNumbers;
 }
 
+function renderComments(url, lineNumber) {
+  let anchor = document.getElementById('flybyComments');
+  const comments = api.getComments(url, lineNumber);
+  if (!comments) {
+    console.log(`no comments for line ${lineNumber}`);
+  } else {
+    comments.forEach(c => injector.injectComment(c.username, c.content, c.picUrl));
+  }
+}
 
+function removeComments() {
+  let flybyComments = document.getElementById('flybyComments');
+  console.log('flybyComments', flybyComments);
+  console.log('flybyComments.children', flybyComments.children);
+  R.forEach(a => flybyComments.removeChild(a), flybyComments.children);
+}
+
+
+function toNumber(element) {
+  return +element;
+}
 
 document.addEventListener("DOMContentLoaded", function () {
+  const URL = window.location.href;
 
-  const tbody = document.getElementsByTagName('tbody')[0]
-  document.getElementsByTagName('head')[0].appendChild(hideCommentEl);
+  // Get all of the CodeComment objects
+  const {
+    codeComments,
+    header,
+    commentLineNumbers,
+  } = CodeCommentService.getAll();
+  console.log('codeComments', codeComments);
 
-  const arr = getComments(tbody)
-  let comments = arr[0]
-  let commentIndexes  = arr[1]
+  // Get a list of all Code objects
+  const codeList = CodeService.getAll(commentLineNumbers);
 
-  for (let i = 0; i < commentIndexes.length; i++) {
-    let linenumber = commentIndexes[i]
-    let comment = comments[linenumber].totalComment
-    console.log(comment)
-    api.addCodeComment(comment, window.location.href, linenumber)
+  // Make a map of line numbers to code objects
+  const codeMap = R.reduce(
+    (a, c) => {
+      a[c.getLineNumber()] = c;
+      return a;
+    },
+    {},
+    codeList
+  );
 
-  }
+  // Get a list of all CodeCommentGroup objects
+  const codeCommentGroups = CodeCommentService.groupCodeComments(codeComments);
 
-  removeComments(comments, commentIndexes, tbody)
+  // Assign CodeCommentGroup objects to their corresponding Code objects
+  CodeService.assignCodeCommentGroupsToCode(codeCommentGroups, codeList);
 
-  const commentLines = Object.keys(comments)
-    .map(key => comments[key])
-    .reduce((a, c) => [...a, ...c.lineNumbers ], [])
-    .map(n => +n)
-
-
-  const codeLinesToComments = injector.matchCodeLinesToComments(commentLines, getLinesWithCode())
-  const codeLines = Object.keys(codeLinesToComments).map(i => +i);
-  let codeLineNodes = []
-  for (let i = 0 ; i < codeLines.length ; i++) {
-    codeLineNodes.push(document.querySelectorAll(`#LC${codeLines[i]}`)[0])
-  }
-  const lineNumberToComment = Object.keys(comments).reduce((a, key) => {
-    const comment = comments[key];
-    for (let i = 0 ; i < comment.lineNumbers.length ; i++) {
-      a[comment.lineNumbers[i]] = comment.commentString[i];
-    }
-    return a;
-  }, {});
+  // Create a DOM node to anchor our injections
   const anchor = injector.configureContainer();
+
+  // Put in our branding
   injector.injectBranding(anchor);
-  injector.injectLineHighlights(codeLines, codeLineNodes);
-  codeLineNodes.forEach((node) => {
-    node.onclick = () => {
-      const lineNumber = +node.getAttribute('id').substring(2);
-      const comment = codeLinesToComments[lineNumber]
-        .reduce((a, c) => a + lineNumberToComment[+c], '')
-        .replace(/(\/{2})/, '');
-      injector.removeAllButBranding(anchor);
-      injector.injectCodeComment(anchor, comment);
-      const comments = api.getComments(window.location.toString());
-      comments.forEach(c => injector.injectComment(anchor, c.username, c.content, c.picUrl));
+
+  // Inject the class for the line highights
+  injector.injectLineHighlights();
+
+  let currentLine = -1;
+
+  for (let i = 0 ; i < codeList.length ; i++) {
+    const code = codeList[i];
+    if (code.hasCodeCommentGroup()) {
+      const lineNumber = code.getLineNumber();
+      const commentGroup = code.getCommentGroup();
+      api.addCodeComment(commentGroup.getContent(), URL, lineNumber);
+
+      code.getNode().classList.add(injector.CLASS_FLYBY_HIGHLIGHT);
+      code.getNode().onclick = () => {
+        if (lineNumber === currentLine) return;
+        injector.clearNonEssential(anchor);
+        injector.injectCodeComment(anchor, code.getCommentGroup().getContent());
+
+        const line = api.getLine(URL, lineNumber);
+        renderComments(URL, lineNumber);
+
+        injector.injectWriteBox(anchor, DEFAULT_PIC);
+
+        code.getNode().classList.add('flybySelected');
+
+        if (currentLine !== -1) {
+          const oldCode = codeMap[currentLine];
+          oldCode.getNode().classList.remove('flybySelected');
+        }
+
+        currentLine = lineNumber;
+
+
+
+        const commentButton = document.querySelector('#flybyWriteBoxCommentButton');
+        const writeBoxContent = document.querySelector('#flybyWriteBoxContent');
+        commentButton.onclick = () => {
+          const content = writeBoxContent.value;
+          if (content.trim() === '') return;
+          const success = api.postComment(content, USER_ID, URL, lineNumber);
+          if (success) {
+            console.log('comment successfully posted');
+            removeComments();
+            renderComments(URL, lineNumber);
+            console.log('db', api.getDb());
+          } else {
+            console.log('comment unsuccessfully posted');
+          }
+
+        }
+
+      }
     }
-  })
-  
-  injector.injectWriteBox(anchor, DEFAULT_PIC);
-
-
-  const commentButton = document.querySelector('#flybyWriteBoxCommentButton');
-  const writeBoxContent = document.querySelector('#flybyWriteBoxContent');
-  commentButton.onclick = () => {
-    const content = writeBoxContent.value;
-    if (content.trim() === '') return;
   }
 
   console.log(api.getDb());
-
 
   // addCommentBack(comments[6])
 })
