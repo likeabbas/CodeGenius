@@ -1,0 +1,17 @@
+/**
+ * @author Anthony Altieri on 6/3/17.
+ */
+
+{
+  "files": {
+    "{owner::branch::path}": "[list of comment ids]"
+  },
+  "comments": {
+    "{id}": {
+      "fileId": "id",
+      "username": "username",
+      "userId": "userId",
+      "timestamp": "date"
+    }
+  }
+}

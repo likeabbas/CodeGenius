@@ -5,11 +5,12 @@
 import firebase from './fb';
 import R from 'ramda';
 
-export function getById(id) {
+export function add(owner, repository, branch, filePath) {
   return new Promise((res, rej) => {
     firebase.database()
-      .ref(`files/${id}`)
-      .once('value')
-      .then(snapshot => res(snapshot))
+      .ref(`files/${owner}|${repository}|${branch}|${filePath}`)
+      .set({
+        comments: [],
+      })
   })
 }
