@@ -246,13 +246,15 @@ document.addEventListener("DOMContentLoaded", function () {
   console.log('hihihi')
   injector.injectWriteBox(anchor, DEFAULT_PIC);
 
+
   const commentButton = document.querySelector('#flybyWriteBoxCommentButton');
   const writeBoxContent = document.querySelector('#flybyWriteBoxContent');
   commentButton.onclick = () => {
     const content = writeBoxContent.value;
     if (content.trim() === '') return;
-
   }
+
+  console.log(api.getDb());
 
 
   // addCommentBack(comments[6])

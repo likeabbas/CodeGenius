@@ -63,6 +63,10 @@ const db = {
   ]
 }
 
+export function getDb() {
+  return db;
+}
+
 export function postComment(content, sorceCodeUrl, lineNumber) {
 }
 
