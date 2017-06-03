@@ -3,6 +3,7 @@
  */
 import getUtil from './util';
 import * as api from './fakeapi';
+import R from 'ramda';
 const utility = getUtil(document);
 
 const COMMENT_CLASS_SELECTOR = '.pl-c';
@@ -14,7 +15,7 @@ const TOP_NODE_ID = 'js-repo-pjax-container';
 
 
 
-function init() {
+export function init() {
   Promise.all([deleteElements(), getLinesWithCode()])
     .then(([commentLines, codeLines]) => {
       const codeLinesToComments = matchCodeLinesToComments(commentLines, codeLines);
@@ -25,7 +26,7 @@ function init() {
     });
 }
 
-function getLineNumberFromSpan(span) {
+export function getLineNumberFromSpan(span) {
   if (span === null || span.parentNode === null) return -1;
   const id = span.parentNode.getAttribute('id');
   if (id === null) return -1;
@@ -66,6 +67,7 @@ export function matchCodeLinesToComments(commentLines, codeLines) {
 
 export function injectWriteBox(anchor, picUrl) {
   const writeBoxWrapper = utility.div();
+  writeBoxWrapper.setAttribute('id', 'flybyWriteBox');
   utility.addClasses(writeBoxWrapper, ['flybyWriteboxWrapper']);
   const container = utility.div();
   utility.addClasses(container, ['flybyWriteBox']);
@@ -94,8 +96,13 @@ export function injectWriteBox(anchor, picUrl) {
   utility.appendChildren(container, [writeContentDiv]);
   utility.appendChildren(anchor, [container]);
 }
+export function clearWriteBox() {
+  const writeBox = document.getElementById('flybyWriteBox');
+  writeBox.parentNode.removeChild(writeBox);
+}
 
-export function injectCodeComment(anchor, content) {
+export function injectCodeComment(content) {
+  const anchor = document.getElementById('flybyCodeComment');
   const container = utility.div();
   utility.addClasses(container, ['flybyComment']);
   const contentDiv = utility.div();
@@ -103,6 +110,11 @@ export function injectCodeComment(anchor, content) {
   utility.addClasses(contentDiv, ['flybyCommentContent', 'codeCommentContent']);
   utility.appendChildren(container, [contentDiv]);
   utility.appendChildren(anchor, [container]);
+}
+
+export function clearCodeComment() {
+  const anchor = document.getElementById('flybyCodeComment');
+  R.forEach(n => anchor.removeChild(n), anchor.children);
 }
 
 
@@ -142,12 +154,26 @@ export function injectBranding(anchor) {
   headerDiv.appendChild(bar);
   headerDiv.appendChild(tagline);
   anchor.append(headerDiv);
+}
+
+function injectCommentsDiv(anchor) {
   const commentsDiv = utility.div();
   commentsDiv.setAttribute('id', 'flybyComments');
   anchor.appendChild(commentsDiv);
 }
+function injectCodeCommentDiv(anchor) {
+  const codeCommentsDiv = utility.div();
+  codeCommentsDiv.setAttribute('id', 'flybyCodeComment');
+  anchor.appendChild(codeCommentsDiv);
+}
 
-function configureContainer() {
+export function initDOM(anchor) {
+  injectBranding(anchor);
+  injectCodeCommentDiv(anchor);
+  injectCommentsDiv(anchor);
+}
+
+export function configureContainer() {
   const topNode = document.querySelector(`#${TOP_NODE_ID}`);
   const div = document.createElement('div');
   div.classList.add('flybyWrapper');
@@ -160,7 +186,7 @@ function configureContainer() {
   return flybyAnchor;
 }
 
-function printCommentsOnClick(codeLinesToComments) {
+export function printCommentsOnClick(codeLinesToComments) {
   Object.keys(codeLinesToComments)
     .forEach((lineNumber) => {
       document.getElementById(`LCutility{lineNumber}`).onclick = () => {
@@ -193,93 +219,9 @@ function stringToNumber(string) {
   return +string;
 }
 
-function getLinesWithCode() {
-  return new Promise((res, rej) => {
-    let codeLines = {};
-    getLines(document.querySelectorAll(CODE_LINE_SELECTOR));
-    const mo = new MutationObserver(process);
-    mo.observe(document, { subtree: true, childList: true });
-    document.addEventListener('DOMContentLoaded', () => {
-      res(Object.keys(codeLines).map(stringToNumber));
-      mo.disconnect()
-    });
-
-    function process(mutations) {
-      for (let i = 0 ; i < mutations.length ; i++) {
-        const nodes = mutations[i].addedNodes;
-        for (let j = 0 ; j < nodes.length ; j++) {
-          const currentNode = nodes[j];
-          if (currentNode.nodeType != ELEMENT_NODE) {
-            continue;
-          }
-          const nodeList = currentNode.matches(CODE_LINE_SELECTOR)
-            ? [currentNode]
-            : currentNode.querySelectorAll(CODE_LINE_SELECTOR);
-          getLines(nodeList);
-        }
-      }
-    }
-
-    function getLines(nodes) {
-      [].forEach.call(nodes, (node) => {
-        if (node.childNodes.length > 1) {
-          codeLines[+node.getAttribute('id').substring(2)] = true;
-        }
-      })
-    }
-
-  })
-}
-
-function deleteElements() {
-  return new Promise((res, rej) => {
-    let commentLines = [];
-
-    doDelete(document.querySelectorAll(COMMENT_CLASS_SELECTOR));
-
-    const mo = new MutationObserver(process);
-    mo.observe(document, { subtree: true, childList: true });
-    document.addEventListener('DOMContentLoaded', function() {
-      res(commentLines);
-      mo.disconnect()
-    });
-
-    function process(mutations) {
-      for (let i = 0; i < mutations.length; i++) {
-        let nodes = mutations[i].addedNodes;
-        for (let j = 0; j < nodes.length; j++) {
-          let n = nodes[j];
-          if (n.nodeType != 1) // only process Node.ELEMENT_NODE
-            continue;
-          const nodeList = n.matches(COMMENT_CLASS_SELECTOR)
-            ? [n]
-            : n.querySelectorAll(COMMENT_CLASS_SELECTOR);
-          doDelete(nodeList);
-        }
-      }
-    }
-    function doDelete(nodes) {
-      [].forEach.call(nodes, (node) => {
-        const commentLine = getLineNumberFromSpan(node);
-        if (commentLine !== -1) {
-          commentLines.push(commentLine);
-        }
-        node.remove();
-      });
-    }
-
-  })
-}
-
 // Chrome pre-34
 if (!Element.prototype.matches) {
   Element.prototype.matches = Element.prototype.webkitMatchesSelector;
-}
-
-function removeChildren(node) {
-  while (node.firstChild) {
-    node.removeChild(node.firstChild);
-  }
 }
 
 function clearNonEssential(anchor) {
@@ -296,9 +238,9 @@ export default {
   injectWriteBox,
   injectLineHighlights,
   injectCodeComment,
-  removeChildren,
   clearNonEssential,
   CLASS_FLYBY_HIGHLIGHT,
+  initDOM,
 }
 
 

@@ -83,10 +83,7 @@ export function getLine(sourceCodeUrl, lineNumber) {
 }
 
 export function getComments(sourceCodeUrl, lineNumber) {
-  console.log('getComments()');
   const line = getLine(sourceCodeUrl, lineNumber);
-  console.log('line', line);
-  console.log('line.comments');
   if (!line) return null;
   return line.comments;
 }
@@ -120,6 +117,9 @@ export function postComment(content, userId, sourceCodeUrl, lineNumber) {
   }
   const user = getUserById(userId);
   const comment = new Comment(content, userId, user.username, timestamp);
+  console.group('POST COMMENT');
+  console.log(comment);
+  console.groupEnd();
   line.comments = [...line.comments, comment];
   return true;
 }

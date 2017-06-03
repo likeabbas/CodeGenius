@@ -1,4 +1,4 @@
-import injector from './injector'
+import * as DOMService from './injector'
 import R from 'ramda';
 import * as api from './fakeapi';
 import * as CodeCommentService from './services/CodeComment';
@@ -200,15 +200,20 @@ function renderComments(url, lineNumber) {
   if (!comments) {
     console.log(`no comments for line ${lineNumber}`);
   } else {
-    comments.forEach(c => injector.injectComment(c.username, c.content, c.picUrl));
+    comments.forEach(c => DOMService.injectComment(c.username, c.content, c.picUrl));
   }
 }
 
 function removeComments() {
   let flybyComments = document.getElementById('flybyComments');
-  console.log('flybyComments', flybyComments);
-  console.log('flybyComments.children', flybyComments.children);
-  R.forEach(a => flybyComments.removeChild(a), flybyComments.children);
+  R.forEach(
+    (a) => {
+      if (!!flybyComments && !!a) {
+        flybyComments.removeChild(a)
+      }
+    },
+    flybyComments.children
+  );
 }
 
 
@@ -247,13 +252,13 @@ document.addEventListener("DOMContentLoaded", function () {
   CodeService.assignCodeCommentGroupsToCode(codeCommentGroups, codeList);
 
   // Create a DOM node to anchor our injections
-  const anchor = injector.configureContainer();
+  const anchor = DOMService.configureContainer();
 
   // Put in our branding
-  injector.injectBranding(anchor);
+  DOMService.initDOM(anchor);
 
   // Inject the class for the line highights
-  injector.injectLineHighlights();
+  DOMService.injectLineHighlights();
 
   let currentLine = -1;
 
@@ -264,16 +269,18 @@ document.addEventListener("DOMContentLoaded", function () {
       const commentGroup = code.getCommentGroup();
       api.addCodeComment(commentGroup.getContent(), URL, lineNumber);
 
-      code.getNode().classList.add(injector.CLASS_FLYBY_HIGHLIGHT);
+      code.getNode().classList.add(DOMService.CLASS_FLYBY_HIGHLIGHT);
       code.getNode().onclick = () => {
         if (lineNumber === currentLine) return;
-        injector.clearNonEssential(anchor);
-        injector.injectCodeComment(anchor, code.getCommentGroup().getContent());
+        DOMService.clearCodeComment();
+        DOMService.injectCodeComment(code.getCommentGroup().getContent());
 
         const line = api.getLine(URL, lineNumber);
         renderComments(URL, lineNumber);
 
-        injector.injectWriteBox(anchor, DEFAULT_PIC);
+        if (currentLine === -1) {
+          DOMService.injectWriteBox(anchor, DEFAULT_PIC);
+        }
 
         code.getNode().classList.add('flybySelected');
 
@@ -296,6 +303,7 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log('comment successfully posted');
             removeComments();
             renderComments(URL, lineNumber);
+            writeBoxContent.value = '';
             console.log('db', api.getDb());
           } else {
             console.log('comment unsuccessfully posted');
