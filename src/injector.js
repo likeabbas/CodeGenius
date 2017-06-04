@@ -139,6 +139,11 @@ export function injectComment(username, content, picUrl) {
   utility.appendChildren(anchor, [commentWrapper]);
 }
 
+export function clearComments() {
+  const anchor = document.getElementById('flybyComments');
+  R.forEach(n => anchor.removeChild(n), anchor.children);
+}
+
 export function injectBranding(anchor) {
   const headerDiv = document.createElement('div');
   headerDiv.classList.add('flybyHeader');

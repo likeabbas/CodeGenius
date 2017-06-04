@@ -11,6 +11,7 @@ const DEFAULT_PIC = 'https://avatars3.githubusercontent.com/u/8461581?v=3&s=40';
 const USER_ID = 123;
 
 
+
 /* 
  * tr -> [td(line number), td (comment string)]  
  * 
@@ -37,7 +38,6 @@ async function renderComments(url, lineNumber) {
   let anchor = document.getElementById('flybyComments');
   try {
     const comments = await CommentApi.get(url, lineNumber);
-    console.log('comments', comments);
     if (!comments) {
       console.log(`no comments for line ${lineNumber}`);
     } else {
@@ -120,6 +120,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (lineNumber === state.getCurrentLine()) return;
         DOMService.clearCodeComment();
         DOMService.injectCodeComment(code.getCommentGroup().getContent());
+        DOMService.clearComments();
 
         renderComments(URL, lineNumber);
 
@@ -141,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
           if (content.trim() === '') return;
 
           try {
-            await CommentApi.add(USER_ID, content, lineNumber, URL);
+            await CommentApi.add(USER_ID, content, lineNumber, DEFAULT_PIC, URL);
             console.log('comment successfully posted');
             removeComments();
             renderComments(URL, lineNumber);
