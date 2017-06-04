@@ -6,11 +6,12 @@ import R from 'ramda';
 const utility = getUtil(document);
 
 const COMMENT_CLASS_SELECTOR = '.pl-c';
-const CONTAINER_SELECTOR = '.container.new-discussion-timeline.experiment-repo-nav';
+export const CONTAINER_SELECTOR = '.container.new-discussion-timeline.experiment-repo-nav';
 const YELLOW_COLOR = 'rgb(248,238, 199)';
 const GREY_COLOR = 'rgba(0,0,0,0.05)';
 const ELEMENT_NODE = 1;
 const TOP_NODE_ID = 'js-repo-pjax-container';
+export const PAGEHEAD_SELECTOR = '.pagehead';
 
 
 
@@ -171,10 +172,94 @@ function injectCodeCommentDiv(anchor) {
   anchor.appendChild(codeCommentsDiv);
 }
 
+const SIDEBAR_SHOWING = true;
+const SIDEBAR_HIDDLEN = false;
+
 export function initDOM(anchor) {
-  injectBranding(anchor);
-  injectCodeCommentDiv(anchor);
-  injectCommentsDiv(anchor);
+
+  const pagehead = document.querySelector(PAGEHEAD_SELECTOR);
+  pagehead.classList.add('pagehead-showing');
+
+  const header = document.getElementsByClassName('header')[0];
+  header.classList.add('header-showing');
+
+  const flybyIconWrapper = document.createElement('div');
+  const flybyIcon = document.createElement('img');
+  flybyIcon.classList.add('flybyIcon');
+  flybyIcon.src = chrome.runtime.getURL('img/flyby.svg');
+  flybyIconWrapper.appendChild(flybyIcon);
+  flybyIconWrapper.classList.add('flybyIconWrapper');
+  flybyIconWrapper.classList.add('noselect');
+  document.getElementsByClassName('user-nav')[0].appendChild(flybyIconWrapper);
+
+
+
+  const main = document.querySelector('div[role=main]');
+  main.classList.add('main-showing');
+  const container = document.querySelector(CONTAINER_SELECTOR);
+  const minimizer = document.createElement('div');
+  minimizer.classList.add('flybyMinimizer');
+  minimizer.innerHTML = 'Hide';
+  minimizer.onclick = () => {
+    if (isSidebarShowing()) {
+      hideSidebar(main, container, header, pagehead);
+    } else {
+      showSidebar(main, container, header, pagehead);
+    }
+  };
+  flybyIconWrapper.onclick = () => {
+    if (!isSidebarShowing()) {
+      showSidebar(main, container, header, pagehead);
+    }
+  };
+  console.log("minimizer", minimizer);
+  console.log("minimizer.onclick", minimizer.onclick);
+  const wrapper = document.createElement('div');
+  wrapper.classList.add('flybyAnchorWrapper');
+  wrapper.appendChild(minimizer);
+  anchor.appendChild(wrapper);
+  injectBranding(wrapper);
+  injectCodeCommentDiv(wrapper);
+  injectCommentsDiv(wrapper);
+  modifyHeader(SIDEBAR_SHOWING)
+}
+
+
+
+export function isSidebarShowing() {
+  const anchor = document.getElementById('anchor');
+  return !anchor.classList.contains('anchor-hide');
+}
+
+export function showSidebar(main, container, header, pagehead) {
+  const anchor = document.getElementById('anchor');
+  anchor.classList.remove('anchor-hide');
+  main.classList.add('main-showing');
+  container.classList.add('container-showing');
+  header.classList.add('header-showing');
+  pagehead.classList.add('pagehead-showing');
+  modifyHeader(SIDEBAR_SHOWING);
+}
+
+export function hideSidebar(main, container, header, pagehead) {
+  console.log('hideSidebar()');
+  const anchor = document.getElementById('anchor');
+  anchor.classList.add('anchor-hide');
+  main.classList.remove('main-showing');
+  container.classList.remove('container-showing');
+  header.classList.remove('header-showing');
+  pagehead.classList.remove('pagehead-showing');
+  modifyHeader(SIDEBAR_HIDDLEN);
+}
+
+export function modifyHeader(isSidebarShowing) {
+  const header = document.getElementsByClassName('header')[0];
+
+  if (isSidebarShowing) {
+    header.classList.add('header-showing');
+  } else {
+    header.classList.remove('header-showing');
+  }
 }
 
 export function configureContainer() {
@@ -183,6 +268,7 @@ export function configureContainer() {
   div.classList.add('flybyWrapper');
   topNode.appendChild(div);
   const container = document.querySelector(CONTAINER_SELECTOR);
+  container.classList.add('container-showing');
   div.appendChild(container);
   const flybyAnchor = document.createElement('div');
   flybyAnchor.id = 'anchor';
@@ -233,6 +319,7 @@ function clearNonEssential(anchor) {
     anchor.removeChild(anchor.children[2]);
   }
 }
+
 
 export default {
   configureContainer,

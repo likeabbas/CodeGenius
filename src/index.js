@@ -131,6 +131,14 @@ document.addEventListener("DOMContentLoaded", function () {
           oldCode.getNode().classList.remove('flybySelected');
         }
 
+        if (!DOMService.isSidebarShowing()) {
+          const pagehead = document.querySelector(DOMService.PAGEHEAD_SELECTOR);
+          const header = document.getElementsByClassName('header')[0];
+          const main = document.querySelector('div[role=main]');
+          const container = document.querySelector(DOMService.CONTAINER_SELECTOR);
+          DOMService.showSidebar(main, container, header, pagehead);
+        }
+
         code.getNode().classList.add('flybySelected');
 
         state.setCurrentLine(lineNumber);

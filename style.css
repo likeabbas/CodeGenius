@@ -1,24 +1,106 @@
-.container.new-discussion-timeline.experiment-repo-nav {
+.flybyIconWrapper {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+    padding: 4px;
+    border-radius: 5px;
+    width: 30px;
+    height: 30px;
+    cursor: pointer;
+    margin: auto;
+    margin-left: 2px;
+    margin-right: 8px;
+}
+.flybyIcon {
+    width: 22px !important;
+    height: 22px !important;
+}
+.user-nav {
+    display: flex;
+    flex-flow: row;
+}
+.noselect {
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+.header-nav {
+    margin-top: 8px !important;
+}
+
+.container.clearfix {
+}
+.header {
+    padding-left: 12px;
+    padding-right: 12px;
+    position: relative;
+}
+
+.header-showing {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: 312px;
+}
+.pagehead {
+    width: 100%;
+    padding: 20px 12px 0 12px;
+}
+.container {
+    width: auto !important;
+}
+
+
+.flybyAnchorWrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    padding: 8px 12px 8px 4px;
+}
+.flybyMinimizer {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    cursor: pointer;
+    background-color: #333;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+}
+
+.container.new-discussion-timeline experiment-repo-nav {
+    transition: width linear 1s, margin linear 1s;
+}
+.container-showing {
     margin-left: 4px !important;
     display: inline-block;
     width: 100%;
 }
-.header {
+.header-showing {
     margin-right: 312px;
     padding-left: 12px;
     padding-right: 12px;
 }
 div[role=main] {
-    margin-right: 312px;
-    padding-right: 4px;
-    padding-left: 4px;
-
+    transition: margin linear 1s;
+    margin: auto;
+}
+.main-showing {
+    margin-right: 312px !important;
+    padding-right: 4px !important;
+    padding-left: 4px !important;
 }
 nav.reponav.js-repo-nav.js-sidenav-container-pjax.zh-attached {
     overflow-x: auto;
+    width: 100%;
 }
-.container {
-    width: auto !important;
+container.repohead-details-container {
+    width: 100% !important;
 }
 .flybyWrapper {
     display: flex;
@@ -113,14 +195,17 @@ nav.reponav.js-repo-nav.js-sidenav-container-pjax.zh-attached {
     padding-left: 12px;
     padding-right: 12px;
 }
+
+.anchor-hide {
+    right: -310px !important;
+}
+
 #anchor {
     width: 310px;
     position: fixed;
     top: 0;
     right: 0;
-    display: inline-block;
     height: 99%;
-    padding: 8px 12px 8px 4px;
     border: 1px solid #ddd;
     border-right: 0px;
     border-top-left-radius: 3px;
