@@ -45,6 +45,7 @@ export function prune(content) {
   // Remove any newlines
   content = content.replace('\n', '');
 
+  // Remove all tokens associated with comments
   if (content.trim().length === 1) {
     if (content === '*') return '';
   }
@@ -70,6 +71,9 @@ export function prune(content) {
   return content;
 }
 
+/**
+ * class that represents a singular line of a comment in the source code
+ */
 class CodeComment {
   constructor(content, lineNumber, node) {
     this.content = prune(content);
@@ -88,6 +92,10 @@ class CodeComment {
   }
 }
 
+/**
+ * class that represents multiple CodeComments that are associated with each
+ * other ie. if multi-line comments group.length > 1 else group.length === 1
+ */
 class CodeCommentGroup {
   constructor(codeCommentList) {
     if (codeCommentList.length === 0) {
@@ -125,6 +133,11 @@ class CodeCommentGroup {
   }
 }
 
+/**
+ * Takes a list of CodeComments and groups them into CodeCommentGroups
+ * @param codeCommentList
+ * @return {Array}
+ */
 export function groupCodeComments(codeCommentList) {
   let groups = [];
   let currentGroup = [];
@@ -151,6 +164,16 @@ export function groupCodeComments(codeCommentList) {
 }
 
 
+/**
+ * Get all CodeComments in source code
+ * @return {{
+ *    codeComments: CodeComment[] the CodeComment list,
+ *    header: CodeComment[] a CodeComment list representing a header
+ *    comment if there was any,
+ *    commentLineNumbers: number[] lines that contain comments in the source
+ *    code
+ *  }}
+ */
 export function getAll() {
   let codeCommentList = [];
   const commentLineNumbers = {};

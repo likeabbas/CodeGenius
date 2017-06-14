@@ -5,65 +5,11 @@ import getUtil from './util';
 import R from 'ramda';
 const utility = getUtil(document);
 
-const COMMENT_CLASS_SELECTOR = '.pl-c';
-export const CONTAINER_SELECTOR = '.container.new-discussion-timeline.experiment-repo-nav';
+export const CONTAINER_SELECTOR = '.container.new-discussion-timeline';
 const YELLOW_COLOR = 'rgb(248,238, 199)';
 const GREY_COLOR = 'rgba(0,0,0,0.05)';
-const ELEMENT_NODE = 1;
 const TOP_NODE_ID = 'js-repo-pjax-container';
 export const PAGEHEAD_SELECTOR = '.pagehead';
-
-
-
-export function init() {
-  Promise.all([deleteElements(), getLinesWithCode()])
-    .then(([commentLines, codeLines]) => {
-      const codeLinesToComments = matchCodeLinesToComments(commentLines, codeLines);
-      injectLineHighlights(Object.keys(codeLinesToComments));
-      printCommentsOnClick(codeLinesToComments);
-      const anchor = configureContainer();
-      injectBranding(anchor);
-    });
-}
-
-export function getLineNumberFromSpan(span) {
-  if (span === null || span.parentNode === null) return -1;
-  const id = span.parentNode.getAttribute('id');
-  if (id === null) return -1;
-  return +(id.substring(2))
-}
-
-// TODO: Handle case where no code content after comments (trailing comments)
-export function matchCodeLinesToComments(commentLines, codeLines) {
-  let codeLinesToComments = {};
-  for (let i = 0 ; i < commentLines.length ; i++) {
-    const commentLine = commentLines[i];
-    let nextCodeLine = -1;
-    for (let j = 0 ; j < codeLines.length ; j++) {
-      const codeLine = codeLines[j];
-      if (codeLine > commentLine) {
-        nextCodeLine = codeLine;
-        break;
-      }
-    }
-    if (nextCodeLine === -1) {
-      console.error('problem matching code lines to comments');
-      return null;
-    }
-    let grouping = [commentLine];
-    let lastCommentIndexAdded = i;
-    for (let j = i + 1; j < commentLines.length ; j++) {
-      const commentLineWalker = commentLines[j];
-      if (commentLineWalker < nextCodeLine) {
-        grouping.push(commentLineWalker);
-        lastCommentIndexAdded = j;
-      }
-    }
-    codeLinesToComments[nextCodeLine] = grouping;
-    i = lastCommentIndexAdded;
-  }
-  return codeLinesToComments;
-}
 
 export function injectWriteBox(anchor, picUrl) {
   const writeBoxWrapper = utility.div();
@@ -96,11 +42,18 @@ export function injectWriteBox(anchor, picUrl) {
   utility.appendChildren(container, [writeContentDiv]);
   utility.appendChildren(anchor, [container]);
 }
+
+
 export function clearWriteBox() {
   const writeBox = document.getElementById('flybyWriteBox');
   writeBox.parentNode.removeChild(writeBox);
 }
 
+/**
+ * Injects a string into the Code Comment section of the Flyby
+ * side bar
+ * @param content String the injected code comment
+ */
 export function injectCodeComment(content) {
   const anchor = document.getElementById('flybyCodeComment');
   const container = utility.div();
@@ -112,12 +65,23 @@ export function injectCodeComment(content) {
   utility.appendChildren(anchor, [container]);
 }
 
+/**
+ * Clears the Code Comment from the Code Comment section of the
+ * side bar
+ */
 export function clearCodeComment() {
   const anchor = document.getElementById('flybyCodeComment');
   R.forEach(n => anchor.removeChild(n), anchor.children);
 }
 
 
+/**
+ * Injects a Comment into the Comment section of the side bar, this
+ * will append and become the Comment that is furthest down
+ * @param username String github username
+ * @param content String comment content
+ * @param picUrl String URL to photo of user from github
+ */
 export function injectComment(username, content, picUrl) {
   const anchor = document.getElementById('flybyComments');
   const container = utility.create('div');
@@ -140,12 +104,19 @@ export function injectComment(username, content, picUrl) {
   utility.appendChildren(anchor, [commentWrapper]);
 }
 
+/**
+ * Clears all Comments from the comment section of the side bar
+ */
 export function clearComments() {
   const anchor = document.getElementById('flybyComments');
   R.forEach(n => anchor.removeChild(n), anchor.children);
 }
 
-export function injectBranding(anchor) {
+/**
+ * Injects the header into the side bar
+ */
+export function injectBranding() {
+  const anchor = document.getElementById('flybyComments');
   const headerDiv = document.createElement('div');
   headerDiv.classList.add('flybyHeader');
   const flyby = document.createElement('h1');
@@ -161,22 +132,34 @@ export function injectBranding(anchor) {
   anchor.append(headerDiv);
 }
 
-function injectCommentsDiv(anchor) {
+/**
+ * Injects the div that will hold the Comments
+ * @param parent Object the dom node that should be the parent
+ */
+function injectCommentsDiv(parent) {
   const commentsDiv = utility.div();
   commentsDiv.setAttribute('id', 'flybyComments');
-  anchor.appendChild(commentsDiv);
+  parent.appendChild(commentsDiv);
 }
-function injectCodeCommentDiv(anchor) {
+/**
+ * Injects the div that will hold the Code Comments
+ * @param parent Object the dom node that should be the parent
+ */
+function injectCodeCommentDiv(parent) {
   const codeCommentsDiv = utility.div();
   codeCommentsDiv.setAttribute('id', 'flybyCodeComment');
-  anchor.appendChild(codeCommentsDiv);
+  parent.appendChild(codeCommentsDiv);
 }
 
 const SIDEBAR_SHOWING = true;
 const SIDEBAR_HIDDLEN = false;
 
+/**
+ * Initializes the DOM by injecting the Flyby side bar and all of
+ * its associated DOM elements
+ * @param anchor Object the node for the flyby anchor div
+ */
 export function initDOM(anchor) {
-
   const pagehead = document.querySelector(PAGEHEAD_SELECTOR);
   pagehead.classList.add('pagehead-showing');
 
@@ -212,8 +195,6 @@ export function initDOM(anchor) {
       showSidebar(main, container, header, pagehead);
     }
   };
-  console.log("minimizer", minimizer);
-  console.log("minimizer.onclick", minimizer.onclick);
   const wrapper = document.createElement('div');
   wrapper.classList.add('flybyAnchorWrapper');
   wrapper.appendChild(minimizer);
@@ -288,6 +269,9 @@ export function printCommentsOnClick(codeLinesToComments) {
 
 export const CLASS_FLYBY_HIGHLIGHT = 'flybyHighlight';
 
+/**
+ * Adds a style tag to the head for the highlighting of source code
+ */
 export function injectLineHighlights() {
   document.querySelector('head').innerHTML += `
     <style>
@@ -309,11 +293,6 @@ function stringToNumber(string) {
   return +string;
 }
 
-// Chrome pre-34
-if (!Element.prototype.matches) {
-  Element.prototype.matches = Element.prototype.webkitMatchesSelector;
-}
-
 function clearNonEssential(anchor) {
   while (anchor.children.length > 2) {
     anchor.removeChild(anchor.children[2]);
@@ -323,7 +302,6 @@ function clearNonEssential(anchor) {
 
 export default {
   configureContainer,
-  matchCodeLinesToComments,
   injectComment,
   injectBranding,
   injectWriteBox,

@@ -1,4 +1,4 @@
-import * as DOMService from './injector'
+import * as DOMService from './services/DOM'
 import R from 'ramda';
 import * as CommentApi from './api/Comment';
 import * as CodeCommentService from './services/CodeComment';

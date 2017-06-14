@@ -4,15 +4,17 @@
 import R from 'ramda';
 const COMMENT_CLASS = 'pl-c';
 
-
+// Get the <tbody> tag that surrounds the source code
 function getTbody() {
   return document.getElementsByTagName('tbody')[0];
 }
+// Gets the <tr> that contains each line of source code
 function getTrs(tbody) {
   return tbody.getElementsByTagName('tr');
 }
+// Gets the DOM nodes associated with a line of code
 export function getCodeLineNodes() {
-  return getTrs(getTbody());
+  return R.pipe(getTbody, getTrs)();
 }
 export function getLineNumber(codeLineNode) {
   // Make sure the correct node is passed in
@@ -28,6 +30,7 @@ export function getLineNumber(codeLineNode) {
     throw new Error('data-line-number attribute should not be null');
   }
 
+  // Return the line number converted to a number
   return +lineNumber;
 }
 
@@ -87,6 +90,10 @@ export function getCodeCommentContent(codeLineNode) {
   return spanComment.textContent;
 }
 
+/**
+ * Class that represents a Line of Code, it can contain a codeCommentGroup
+ * if comment(s) are associated with this line of Code
+ */
 class Code {
   constructor(content, lineNumber, node) {
     this.content = content;
@@ -118,6 +125,16 @@ class Code {
   }
 }
 
+/**
+ * Assigns comments in the source code to Code objects. Comments that are
+ * directly above lines of code (or end directly above a line of code in the
+ * case of a multi-line comment) are associated with that line of code which is
+ * represented by the Code object
+ *
+ * @param codeCommentGroups Object[] A list of CodeCommentGroups for the source
+ * code
+ * @param codeList Object[] A list of Code objects for the source code
+ */
 export function assignCodeCommentGroupsToCode(codeCommentGroups, codeList) {
   // Map line numbers to Code objects
   const lineNumberToCode = {};
@@ -149,7 +166,6 @@ function getCodeContent(codeLineNode) {
 export function getAll(commentLineNumbers) {
   const commentLineMap = {};
   R.forEach(cl => commentLineMap[cl] = true, commentLineNumbers);
-  console.log('commentLineMap', commentLineMap);
   let codeList = [];
   const codeLineNodes = getCodeLineNodes();
 
