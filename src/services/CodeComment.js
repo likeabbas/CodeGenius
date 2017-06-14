@@ -1,6 +1,5 @@
+
 /**
- * @author Anthony Altieri on 6/3/17.
- *
  * Comments are stored on Github in the following fashion
  * <tr>
  *  <td
