@@ -1,7 +1,7 @@
 /**
  * Created by abbas and anthony altieri on 5/15/17.
  */
-import getUtil from './util';
+import getUtil from '../util';
 import R from 'ramda';
 const utility = getUtil(document);
 
