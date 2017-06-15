@@ -1,11 +1,11 @@
 {
-  "name": "scholar",
+  "name": "codegenius",
   "version": "1.0.0",
-  "description": "React + Redux implementation of CrowdSnap SCHOLAR",
+  "description": "Making programmers code better - agile code review",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack-dashboard -c -- node server.js",
+    "start": "webpack --progess --color --watch",
     "stats": "webpack --profile --json > stats.json",
     "build": "webpack --progress --colors",
     "watch": "webpack --progress --colors --watch"
