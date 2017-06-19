@@ -4,11 +4,12 @@
   "description": "This extension extends Github's view to allow for productive, agile code reviews",
   "version": "0.1",
   "browser_action": {
-    "default_icon": "icon.png",
+    "default_icon": "airplanemode-on.png",
     "default_popup": "popup.html"
   },
   "web_accessible_resources": [
-    "img/*.svg"
+    "img/*.svg",
+    "img/*.png"
   ],
 
   "content_scripts": [
