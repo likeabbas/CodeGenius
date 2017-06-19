@@ -116,7 +116,7 @@ export function clearComments() {
  * Injects the header into the side bar
  */
 export function injectBranding() {
-  const anchor = document.getElementById('flybyComments');
+  const anchor = document.getElementsByClassName('flybyAnchorWrapper')[0];
   const headerDiv = document.createElement('div');
   headerDiv.classList.add('flybyHeader');
   const flyby = document.createElement('h1');
